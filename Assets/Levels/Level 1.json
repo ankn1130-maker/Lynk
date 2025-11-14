@@ -1,0 +1,38 @@
+{
+    "levelName": "Level 1",
+    "sizeX": 2,
+    "sizeZ": 3,
+    "cellSize": 1.0,
+    "dots": [
+        {
+            "x": 0,
+            "z": 0,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 0,
+            "z": 1,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 0,
+            "z": 2,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 1,
+            "z": 0,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 1,
+            "z": 1,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 1,
+            "z": 2,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        }
+    ]
+}

@@ -1,0 +1,196 @@
+{
+    "levelName": "Level 3",
+    "sizeX": 2,
+    "sizeZ": 3,
+    "cellSize": 1.0,
+    "dots": [
+        {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "z": 1,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "z": 2,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 1,
+            "y": 0,
+            "z": 1,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        },
+        {
+            "x": 1,
+            "y": 0,
+            "z": 2,
+            "prefabPath": "Assets/Prefab/Specical/Cube.prefab"
+        }
+    ],
+    "lines": [
+        {
+            "startKey": "(-0.5, 0.0, 0.0)",
+            "endKey": "(-0.5, 0.0, 1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(-0.5, 0.0, 0.0)",
+            "endKey": "(-0.5, 0.0, -1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, -1.0)",
+            "endKey": "(-0.5, 0.0, -1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, -1.0)",
+            "endKey": "(-0.5, 0.0, 0.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(-0.5, 0.0, 0.0)",
+            "endKey": "(0.5, 0.0, -1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, 0.0)",
+            "endKey": "(-0.5, 0.0, 0.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, 0.0)",
+            "endKey": "(0.5, 0.0, -1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, 0.0)",
+            "endKey": "(-0.5, 0.0, 1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, 0.0)",
+            "endKey": "(-0.5, 0.0, -1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(-0.5, 0.0, 1.0)",
+            "endKey": "(0.5, 0.0, 0.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(-0.5, 0.0, -1.0)",
+            "endKey": "(0.5, 0.0, 0.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, 1.0)",
+            "endKey": "(-0.5, 0.0, 1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, 1.0)",
+            "endKey": "(0.5, 0.0, 0.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(0.5, 0.0, 1.0)",
+            "endKey": "(-0.5, 0.0, 0.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        },
+        {
+            "startKey": "(-0.5, 0.0, 0.0)",
+            "endKey": "(0.5, 0.0, 1.0)",
+            "lineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        }
+    ]
+}
