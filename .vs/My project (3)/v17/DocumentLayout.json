@@ -3,36 +3,32 @@
   "WorkspaceRootPath": "D:\\Works\\UnityProjects\\My project (3)\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|d:\\works\\unityprojects\\my project (3)\\assets\\script\\boardgrid3d.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\boardgrid3d.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|D:\\Works\\UnityProjects\\My project (3)\\assets\\script\\cubetaphandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\cubetaphandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|D:\\Works\\UnityProjects\\My project (3)\\assets\\script\\leveleditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\leveleditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 5.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Levels\\Level 5.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|d:\\works\\unityprojects\\my project (3)\\assets\\script\\boardgrid3d.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\boardgrid3d.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 1.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Levels\\Level 1.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 8.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Levels\\Level 8.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|D:\\Works\\UnityProjects\\My project (3)\\assets\\script\\autocentercamera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\autocentercamera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|D:\\Works\\UnityProjects\\My project (3)\\assets\\script\\orbitcamera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\orbitcamera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|D:\\Works\\UnityProjects\\My project (3)\\assets\\script\\cubetaphandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\cubetaphandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|D:\\Works\\UnityProjects\\My project (3)\\assets\\script\\mousecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\mousecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|D:\\Works\\UnityProjects\\My project (3)\\assets\\script\\orbitcamera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{27AB3609-15DB-52E3-4D4E-5A489B4C4689}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\orbitcamera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,32 +38,20 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Level 5.json",
-              "DocumentMoniker": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 5.json",
-              "RelativeDocumentMoniker": "Assets\\Levels\\Level 5.json",
-              "ToolTip": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 5.json",
-              "RelativeToolTip": "Assets\\Levels\\Level 5.json",
-              "ViewState": "AgIAAK4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-14T07:45:41.352Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Level 1.json",
-              "DocumentMoniker": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 1.json",
-              "RelativeDocumentMoniker": "Assets\\Levels\\Level 1.json",
-              "ToolTip": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 1.json",
-              "RelativeToolTip": "Assets\\Levels\\Level 1.json",
+              "DocumentIndex": 2,
+              "Title": "Level 8.json",
+              "DocumentMoniker": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 8.json",
+              "RelativeDocumentMoniker": "Assets\\Levels\\Level 8.json",
+              "ToolTip": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Levels\\Level 8.json",
+              "RelativeToolTip": "Assets\\Levels\\Level 8.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-14T06:48:50.655Z",
+              "WhenOpened": "2025-11-17T02:34:16.307Z",
+              "IsPinned": true,
               "EditorCaption": ""
             },
             {
@@ -84,7 +68,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 5,
               "Title": "MouseController.cs",
               "DocumentMoniker": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Script\\MouseController.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\MouseController.cs",
@@ -96,46 +80,45 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "CubeTapHandler.cs",
               "DocumentMoniker": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Script\\CubeTapHandler.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\CubeTapHandler.cs",
               "ToolTip": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Script\\CubeTapHandler.cs",
               "RelativeToolTip": "Assets\\Script\\CubeTapHandler.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEUAAAA+AAAAAAAAAA==",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAAwHgAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T02:44:53.43Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T02:44:53.43Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "LevelEditor.cs",
               "DocumentMoniker": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Script\\LevelEditor.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\LevelEditor.cs",
               "ToolTip": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Script\\LevelEditor.cs",
               "RelativeToolTip": "Assets\\Script\\LevelEditor.cs",
-              "ViewState": "AgIAAE4AAAAAAAAAAAAawHYAAAA6AAAAAAAAAA==",
+              "ViewState": "AgIAACoBAAAAAAAAAAAvwEEBAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-13T02:44:22.384Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "BoardGrid3D.cs",
               "DocumentMoniker": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Script\\BoardGrid3D.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\BoardGrid3D.cs",
               "ToolTip": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Script\\BoardGrid3D.cs",
               "RelativeToolTip": "Assets\\Script\\BoardGrid3D.cs",
-              "ViewState": "AgIAAAACAAAAAAAAAAAtwBgCAABWAAAAAAAAAA==",
+              "ViewState": "AgIAADYBAAAAAAAAAAArwFIBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-13T02:43:50.066Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 3,
               "Title": "AutoCenterCamera.cs",
               "DocumentMoniker": "D:\\Works\\UnityProjects\\My project (3)\\Assets\\Script\\AutoCenterCamera.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\AutoCenterCamera.cs",
@@ -143,8 +126,7 @@
               "RelativeToolTip": "Assets\\Script\\AutoCenterCamera.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T02:43:24.826Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T02:43:24.826Z"
             }
           ]
         }

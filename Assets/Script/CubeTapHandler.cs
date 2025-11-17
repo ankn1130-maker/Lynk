@@ -87,9 +87,9 @@ public class CubeTapHandler : MonoBehaviour
             {
                 if (!gameObject.CompareTag("Specical"))
                 {
-                    Debug.Log($"🔍 VỊ TRÍ GRID: {gridPos} , vị trí firstSelectedCube : {firstSelectedCube.gridPos}"); // ← IN RA (x,y,z)
+                    Debug.Log($"🔍 VỊ TRÍ GRID: {gridPos} , vị trí firstSelectedCube : {firstSelectedCube.gridPos} , color : {selectedColor}"); // ← IN RA (x,y,z)
                     render.material.color = (Color)selectedColor;
-                    board.HightLightLineBetween(gridPos, firstSelectedCube.gridPos, (Color)selectedColor);
+                    board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor);  // Highlight cube 1 màu
                     firstSelectedCube = this;
 
                 }

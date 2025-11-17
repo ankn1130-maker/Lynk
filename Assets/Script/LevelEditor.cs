@@ -7,7 +7,7 @@ using UnityEngine;
 public class LevelEditor : EditorWindow
 {
     // === CẤU HÌNH BOARD ===
-    private int sizeX = 2, sizeZ = 3 ,sizeY=1;
+    private int sizeX = 2, sizeZ = 3, sizeY = 1;
     private int LineCount;
     private float cellSize = 1f;
     private Color redColor = Color.red;
@@ -118,12 +118,12 @@ public class LevelEditor : EditorWindow
                                 // SPAWN MỚI
                                 createdBoard.SpawnPrefabAt(dot.gridPos, prefab);
                                 // 🆕 THÊM: Log vị trí Point khi kéo/spawn
-                                dot.gridPos = new Vector3Int(x,y,z);
+                                dot.gridPos = new Vector3Int(x, y, z);
                                 LogPointPositionAtSpawn(dot.gridPos, go.name);
                                 dot.prefabColor = Color.gray;  // Hoặc lấy từ prefab material
                                 UpdatePrefabColor(dot.gridPos, dot.prefabColor);  // Update instance
-                          
-                            Debug.Log($"specialDots.Count :{specialDots.Count}");
+
+                                Debug.Log($"specialDots.Count :{specialDots.Count}");
                                 Debug.Log($"<color=magenta>INSTANT SPAWN: {go.name} tại {dot.gridPos}</color>");
                             }
                         }
@@ -149,7 +149,7 @@ public class LevelEditor : EditorWindow
                         {
                             // Clear path và xóa instance/lines
                             dot.prefabPath = "";
-                            dot.prefabColor=Color.white;
+                            dot.prefabColor = Color.white;
                             ClearPrefabAtPosition(dot.gridPos);
                             if (createdBoard != null)
                             {
@@ -160,10 +160,10 @@ public class LevelEditor : EditorWindow
                         }
                         EditorGUILayout.EndHorizontal();
                     }
-                    
+
                     EditorGUILayout.EndHorizontal();
 
-               
+
                 }
             }
         }
@@ -286,17 +286,7 @@ public class LevelEditor : EditorWindow
             }
         }
     }
-    private void RegenerateAllSpecialDots()
-    {
-        specialDots.Clear();
-        for (int x = 0; x < sizeX; x++)
-            for (int y = 0; y < sizeY; y++)
-                for (int z = 0; z < sizeZ; z++)
-            {
-                specialDots.Add(new SpecialDot { gridPos = new Vector3Int(x, 0, z) });
-            }
-        Debug.Log($"<color=cyan>Regenerated theo Z outer X inner</color>");
-    }
+
     // HÀM MỚI: TỰ ĐỘNG TẠO BOARD NẾU CHƯA CÓ
     private void AutoCreateBoardIfNeeded()
     {
@@ -341,7 +331,7 @@ public class LevelEditor : EditorWindow
         createdBoard.mainColors = new Color[] { redColor, blueColor };
         // TẠO BOARD NHƯNG KHÔNG VẼ LINE
         createdBoard.GenerateBoard();
-        createdBoard.CreateGridLines(); // Có thể comment nếu không muốn line
+        //createdBoard.CreateGridLines(); // Có thể comment nếu không muốn line
         // Spawn prefab + tô màu special dots
         foreach (var dot in specialDots)
         {
@@ -353,6 +343,21 @@ public class LevelEditor : EditorWindow
             }
         }
         createdBoard.ApplySpecialDots(specialDots);
+        UpdateAllPrefabColors();
+    }
+    private void UpdateAllPrefabColors()
+    {
+        if (createdBoard == null || specialDots == null) return;
+        int count = 0;
+        foreach (var dot in specialDots)
+        {
+            if (!string.IsNullOrEmpty(dot.prefabPath))
+            {
+                UpdatePrefabColor(dot.gridPos, dot.prefabColor);
+                count++;
+            }
+        }
+        Debug.Log($"<color=green>Updated colors for {count} prefabs</color>");
     }
     // 🆕 XÓA BOARD
     private void DeleteBoard()
@@ -393,26 +398,61 @@ public class LevelEditor : EditorWindow
     }
     private void DrawGridDots()
     {
-        Handles.color = new Color(0.7f, 0.7f, 0.7f);
+        // Vẽ điểm góc (corners) – giữ nguyên
+        Handles.color = new Color(0.7f, 0.7f, 0.7f);  // Màu xám nhạt cho góc
         for (int x = 0; x < sizeX; x++)
         {
             for (int z = 0; z < sizeZ; z++)
             {
                 Vector3 worldPos = GridToWorld(new Vector3Int(x, 0, z));
-                Handles.DrawSolidDisc(worldPos, Vector3.up, 0.08f);
+                Handles.DrawSolidDisc(worldPos, Vector3.up, 0.08f);  // Điểm góc lớn hơn
             }
         }
-        // ĐƯỜNG NỐI
-        Handles.color = new Color(0.3f, 0.3f, 0.3f);
+
+        // 🆕 THÊM: Vẽ center points ở giữa mỗi ô (giữa 4 góc)
+        Handles.color = Color.cyan;  // Màu xanh dương nổi bật để phân biệt center
+        for (int x = 0; x < sizeX - 1; x++)  // -1 vì giữa ô (sizeX-1 ô)
+        {
+            for (int z = 0; z < sizeZ - 1; z++)  // -1 tương tự
+            {
+                // Tính grid trung tâm (float)
+                Vector3 centerGrid = new Vector3(x + 0.5f, 0, z + 0.5f);
+                Vector3 worldPos = GridToWorld(Vector3Int.FloorToInt(centerGrid));  // Chuyển sang world (dùng FloorToInt để khớp GridToWorld)
+                                                                                    // Offset để chính giữa: + (cellSize * 0.5f) cho x/z
+                worldPos += new Vector3(cellSize * 0.5f, 0, cellSize * 0.5f);
+
+                Handles.DrawSolidDisc(worldPos, Vector3.up, 0.05f);  // Điểm center nhỏ hơn
+                                                                     // Optional: Label tên để debug
+                                                                     // Handles.Label(worldPos + Vector3.up * 0.1f, $"C{x}_{z}", EditorStyles.miniLabel);
+            }
+        }
+
+        // ĐƯỜNG NỐI ngang/dọc – giữ nguyên
+        Handles.color = new Color(0.3f, 0.3f, 0.3f);  // Màu xám đen
         for (int x = 0; x < sizeX; x++)
         {
             for (int z = 0; z < sizeZ; z++)
             {
                 Vector3 p = GridToWorld(new Vector3Int(x, 0, z));
-                if (x < sizeX - 1) Handles.DrawLine(p, GridToWorld(new Vector3Int(x + 1, 0, z)));
-                if (z < sizeZ - 1) Handles.DrawLine(p, GridToWorld(new Vector3Int(x, 0, z + 1)));
+                if (x < sizeX - 1) Handles.DrawLine(p, GridToWorld(new Vector3Int(x + 1, 0, z)));  // Ngang
+                if (z < sizeZ - 1) Handles.DrawLine(p, GridToWorld(new Vector3Int(x, 0, z + 1)));  // Dọc
             }
         }
+
+        // Optional: Thêm line chéo nếu muốn (hình X đầy đủ)
+        // Handles.color = new Color(0.2f, 0.2f, 0.5f);  // Màu xanh đậm cho chéo
+        // for (int x = 0; x < sizeX - 1; x++)
+        // {
+        //     for (int z = 0; z < sizeZ - 1; z++)
+        //     {
+        //         Vector3 p1 = GridToWorld(new Vector3Int(x, 0, z));
+        //         Vector3 p2 = GridToWorld(new Vector3Int(x + 1, 0, z + 1));  // Chéo phải-xuống
+        //         Handles.DrawLine(p1, p2);
+        //         Vector3 p3 = GridToWorld(new Vector3Int(x + 1, 0, z));
+        //         Vector3 p4 = GridToWorld(new Vector3Int(x, 0, z + 1));  // Chéo trái-xuống
+        //         Handles.DrawLine(p3, p4);
+        //     }
+        // }
     }
     private void DrawSpecialDots()
     {
@@ -506,7 +546,7 @@ public class LevelEditor : EditorWindow
             sizeX = sizeX,
             sizeZ = sizeZ,
             cellSize = cellSize,
-            dots = specialDots.Where(d => !string.IsNullOrEmpty(d.prefabPath)).Select(d => new DotData { x = d.gridPos.x, z = d.gridPos.z, prefabPath = d.prefabPath , prefabColor=d.prefabColor})
+            dots = specialDots.Where(d => !string.IsNullOrEmpty(d.prefabPath)).Select(d => new DotData { x = d.gridPos.x, z = d.gridPos.z, prefabPath = d.prefabPath, prefabColor = d.prefabColor })
             .ToList(), // ← FIX: Bỏ isRed
             lines = new List<LineData>()
         };
@@ -539,7 +579,7 @@ public class LevelEditor : EditorWindow
         sizeX = data.sizeX;
         sizeZ = data.sizeZ;
         cellSize = data.cellSize;
-        LineCount=data.lines.Count;
+        LineCount = data.lines.Count;
         // Clear và regenerate để sync size
         specialDots.Clear();
         RegenerateAllSpecialDots(); // Tạo full list
@@ -564,22 +604,21 @@ public class LevelEditor : EditorWindow
             DeleteBoard();
             CreateBoard(); // Re-apply special dots và spawn prefab
         }
-       
+
         Debug.Log($"<color=green>Loaded {data.dots.Count} prefabs from {path}</color>");
         Repaint(); // Refresh UI
     }
-    // 🆕 THÊM: Update màu cho tất cả spawned prefabs từ specialDots (gọi sau spawn/load)
-    private void UpdateAllPrefabColors()
+
+    private void RegenerateAllSpecialDots()
     {
-        if (createdBoard == null || specialDots == null) return;
-        foreach (var dot in specialDots)
-        {
-            if (!string.IsNullOrEmpty(dot.prefabPath))
-            {
-                UpdatePrefabColor(dot.gridPos, dot.prefabColor);  // Update instance
-            }
-        }
-        Debug.Log("<color=green>Updated màu cho tất cả prefabs sau load</color>");
+        specialDots.Clear();
+        for (int x = 0; x < sizeX; x++)
+            for (int y = 0; y < sizeY; y++)
+                for (int z = 0; z < sizeZ; z++)
+                {
+                    specialDots.Add(new SpecialDot { gridPos = new Vector3Int(x, 0, z) });
+                }
+        Debug.Log($"<color=cyan>Regenerated theo Z outer X inner</color>");
     }
 
     // 🆕 THÊM: Update màu cho 1 prefab instance

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,17 +23,77 @@ public class BoardGrid3D : MonoBehaviour
     public List<Transform> sphereList = new List<Transform>(); // Danh sách sphere
     public Vector3Int gridPos;
     public Dictionary<string, LineRenderer> lineRenderers = new Dictionary<string, LineRenderer>();
+    // Center points
+    private Dictionary<Vector2Int, Transform> centerPoints = new Dictionary<Vector2Int, Transform>();
     int index = 0;
     // Biến duy nhất lưu màu
     public Color[] mainColors = { Color.red, Color.blue };
-
+    [Header("Center Points")]
+    public bool generateCenterPoints = true;   // bật/tắt
+    public float centerPointScale = 0.25f;    // kích thước cube/point ở giữa
+    [SerializeField] public string jsonPath = "Assets/Levels/DefaultLevel.json"; // Biến public để LevelEditor có thể gán
     void Start()
     {
-        occupied = new GameObject[sizeX, sizeY, sizeZ];
-        GenerateBoard();
+       
         CreateHighlight();
+        LogAllLines();
     }
+    // 🆕 HÀM MỚI: Map DotData từ JSON thành SpecialDot để dùng ApplySpecialDots
 
+    public void LogAllLines()
+    {
+        // 🆕 THÊM: Kiểm tra null
+        if (lineRenderers == null)
+        {
+            Debug.LogError("<color=red>lineRenderers is NULL! Khởi tạo dictionary chưa?</color>");
+            return;
+        }
+
+        if (lineRenderers.Count == 0)
+        {
+            Debug.Log("<color=orange>lineRenderers rỗng (0 lines)!</color>");
+            return;
+        }
+
+        Debug.Log($"<color=blue>=== LOG {lineRenderers.Count} LINES TRONG lineRenderers ===</color>");
+
+        foreach (var kvp in lineRenderers)
+        {
+            string key = kvp.Key;
+            LineRenderer lr = kvp.Value;
+
+            // 🆕 THÊM: Kiểm tra lr null
+            if (lr == null)
+            {
+                Debug.LogError($"<color=red>LineRenderer NULL cho key '{key}'! Xóa key này.</color>");
+                lineRenderers.Remove(key);
+                continue;
+            }
+
+            Vector3 start = lr.GetPosition(0);
+            Vector3 end = lr.GetPosition(1);
+            Color lineColor = lr.material?.color ?? Color.white;  // Null-safe color
+            float width = lr.startWidth;  // Giả sử startWidth = endWidth
+
+            string lineName = lr.gameObject.name;  // Tên GameObject
+
+            // Log chi tiết
+            Debug.Log($"<color=cyan>[LINE #{lineRenderers.Keys.ToList().IndexOf(key)}]</color> " +
+                      $"<color=yellow>Key: {key}</color> | " +
+                      $"<color=lime>Name: {lineName}</color> | " +
+                      $"Start: {start:F2} ↔ End: {end:F2} | " +
+                      $"<color={lineColor}>Màu: {lineColor}</color> | " +
+                      $"<color=orange>Width: {width:F3}</color>");
+
+            // 🆕 THÊM: Kiểm tra line có valid (pos khác nhau)
+            if (Vector3.Distance(start, end) < 0.01f)
+            {
+                Debug.LogWarning($"<color=red>Line '{key}' có pos trùng (zero length) – Xóa?</color>");
+            }
+        }
+
+        Debug.Log($"<color=blue>=== KẾT THÚC LOG {lineRenderers.Count} LINES ===</color>");
+    }
     public Vector3Int WorldToGridPos(Vector3 worldPos)
     {
         int x = Mathf.RoundToInt((worldPos.x + sizeX / 2f * cellSize) / cellSize);
@@ -98,10 +160,22 @@ public class BoardGrid3D : MonoBehaviour
         highlightTile.SetActive(false);
         highlightTile.transform.parent = transform;
     }
-
+    public void RebuildAllLines()
+    {
+        ClearAllLines();  // Xóa cũ
+        foreach (var kvp in intersections)
+        {
+            Vector3Int pos = kvp.Key;
+            if (GetPieceAt(pos) != null)
+            {
+                DrawLinesFromCube(pos);  // Vẽ từ piece có
+            }
+        }
+        Debug.Log($"<color=green>Rebuilt {lineRenderers.Count} dynamic lines!</color>");
+    }
     public void GenerateBoard()
     {
-        // === TẠO PLANE TRẮNG ===
+        // Tạo plane trắng (giữ nguyên)
         GameObject board = GameObject.CreatePrimitive(PrimitiveType.Plane);
         board.transform.parent = transform;
         board.transform.localScale = new Vector3(sizeX * 0.1f, 1, sizeZ * 0.1f);
@@ -109,15 +183,15 @@ public class BoardGrid3D : MonoBehaviour
         whiteMat.color = Color.white;
         board.GetComponent<Renderer>().material = whiteMat;
 
-        // XÓA DỮ LIỆU CŨ
+        // XÓA DỮ LIỆU CŨ (giữ nguyên)
         sphereList.Clear();
         intersections.Clear();
         index = 0;
         occupied = new GameObject[sizeX, sizeY, sizeZ];
 
-        Debug.Log("<color=blue>=== BẮT ĐẦU TẠO POINTS (Thứ tự: X → Y → Z) ===</color>");
+        Debug.Log("<color=blue>=== BẮT ĐẦU TẠO POINTS (X → Y → Z) ===</color>");
 
-        // === TẠO POINT (CHỈ ĐỂ LƯU TỌA ĐỘ) ===
+        // TẠO POINT VÀ CUBE (giữ nguyên, nhưng bật renderer tạm để test – sau tắt lại)
         for (int x = 0; x < sizeX; x++)
             for (int y = 0; y < sizeY; y++)
                 for (int z = 0; z < sizeZ; z++)
@@ -129,27 +203,53 @@ public class BoardGrid3D : MonoBehaviour
                     point.transform.position = worldPos;
                     intersections[gridPos] = point.transform;
 
-                    // TẠO CUBE NHỎ NHƯNG ẨN ĐI
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.SetParent(point.transform);
                     cube.transform.localPosition = Vector3.zero;
                     cube.transform.localScale = Vector3.one * 0.3f;
-                    cube.GetComponent<Renderer>().enabled = false; // ẨN CUBE
-                    cube.GetComponent<BoxCollider>().enabled = false; // TẮT COLLIDER
+                    cube.GetComponent<Renderer>().enabled = false;  // ← SỬA TẠM: BẬT ĐỂ THẤY (sau test tắt = false)
+                    cube.GetComponent<Renderer>().material.color = Color.gray;  // Màu xám để phân biệt
+                    cube.GetComponent<BoxCollider>().enabled = false;
                     sphereList.Add(cube.transform);
 
-                    // 🆕 THÊM: Log thứ tự tạo point
                     index++;
-                    Debug.Log($"<color=cyan>[{index:00}] TẠO POINT: {point.name} | Grid: {gridPos} | World Pos: {worldPos:F2} (X={x}, Y={y}, Z={z})</color>");
+                    Debug.Log($"<color=cyan>[{index:00}] TẠO POINT: {point.name} | Grid: {gridPos} | World: {worldPos:F2}</color>");
                 }
 
+        // 🆕 SỬA: CENTER POINTS WORLD POS SAI (z = x → z)
+        if (generateCenterPoints)
+        {
+            for (int x = 0; x < sizeX - 1; x++)
+                for (int z = 0; z < sizeZ - 1; z++)
+                {
+                    Vector3 centerGrid = new Vector3(x + 0.5f, 0, z + 0.5f);
+                    // 🆕 SỬA: Tính worldPos đúng (trung bình 4 góc)
+                    Vector3 worldPos = (GridToWorldPos(new Vector3Int(x, 0, z)) + GridToWorldPos(new Vector3Int(x + 1, 0, z)) +
+                                       GridToWorldPos(new Vector3Int(x, 0, z + 1)) + GridToWorldPos(new Vector3Int(x + 1, 0, z + 1))) * 0.25f;
 
-        Debug.Log($"<color=blue>=== HOÀN THÀNH TẠO {index} POINTS ===</color>");
+                    GameObject centerObj = new GameObject($"Center_{x}_{z}");
+                    centerObj.transform.parent = transform;
+                    centerObj.transform.position = worldPos;
 
-        // KHÔNG GỌI CreateGridLines() → KHÔNG CÓ LINE
-        // CreateGridLines(); // COMMENT DÒNG NÀY
-        ClearAllLines();
-        Debug.Log("<color=cyan>Board generated - NO GRID LINES, only dynamic adjacent lines</color>");
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.SetParent(centerObj.transform);
+                    cube.transform.localPosition = Vector3.zero;
+                    cube.transform.localScale = Vector3.one * centerPointScale;
+                    cube.GetComponent<Renderer>().enabled = false;  // ← TẠM BẬT ĐỂ THẤY
+                    cube.GetComponent<Renderer>().material.color = Color.cyan;  // Màu xanh để phân biệt
+                    cube.GetComponent<BoxCollider>().enabled = false;
+                    centerPoints[new Vector2Int(x, z)] = centerObj.transform;
+
+                    Debug.Log($"<color=magenta>Center {x}_{z} tại {worldPos:F2}</color>");
+                }
+        }
+
+        Debug.Log($"<color=blue>=== HOÀN THÀNH {index} POINTS + {centerPoints.Count} CENTERS ===</color>");
+
+        // KHÔNG VẼ GRID LINE (comment)
+        // CreateGridLines();
+
+        Debug.Log("<color=cyan>Board generated - Ready for dynamic lines</color>");
     }
 
     // 🆕 HÀM MỚI: Clear TẤT CẢ lines (gọi khi regenerate để hủy gap lines)
@@ -169,26 +269,36 @@ public class BoardGrid3D : MonoBehaviour
     // 🆕 HÀM MỚI: ÁP DỤNG SPECIAL DOTS
     public void ApplySpecialDots(List<LevelEditor.SpecialDot> specialDots = null)
     {
-        // NẾU KHÔNG CÓ DỮ LIỆU → KHÔNG LÀM GÌ CẢ
-        if (specialDots == null || specialDots.Count == 0)
-            return;
+        if (specialDots == null || specialDots.Count == 0) return;
 
-        // CHỈ TÔ MÀU + TAG CHO CÁC CUBE TRONG specialDots
         foreach (var dot in specialDots)
         {
             if (IsValidPosition(dot.gridPos))
             {
+                // 1. Tag cube ẩn (giữ nguyên)
                 int idx = dot.gridPos.z * sizeX + dot.gridPos.x;
                 if (idx < sphereList.Count)
                 {
-                    Renderer rend = sphereList[idx].GetComponent<Renderer>();
-                   
-                    sphereList[idx].gameObject.tag = "Specical";
+                    sphereList[idx].gameObject.tag = "Special";  // Sửa typo: "Specical" → "Special"
+                }
+
+                // 🆕 THÊM: Tô màu prefab instance nếu có
+                GameObject prefabInstance = GetPieceAt(dot.gridPos);
+                if (prefabInstance != null && dot.prefabColor != Color.white)  // Color.white = mặc định
+                {
+                    Renderer[] renderers = prefabInstance.GetComponentsInChildren<Renderer>();
+                    foreach (var rend in renderers)
+                    {
+                        if (rend.material != null)
+                        {
+                            rend.material.color = dot.prefabColor;
+                        }
+                    }
+                    Debug.Log($"<color=green>Applied color {dot.prefabColor} to prefab at {dot.gridPos}</color>");
                 }
             }
         }
     }
-
     // 🆕 HÀM MỚI: KIỂM TRA ADJACENT TRỰC TIẾP (CÁCH ĐÚNG 1 GRID, BAO GỒM CHÉO)
     public bool IsAdjacent(Vector3Int a, Vector3Int b)
     {
@@ -202,50 +312,76 @@ public class BoardGrid3D : MonoBehaviour
 
     private void DrawLinesFromCube(Vector3Int center)
     {
-        // LẤY PIECE TẠI CENTER
         GameObject pieceA = GetPieceAt(center);
         if (pieceA == null) return;
-        Transform a = pieceA.transform; // ← DÙNG PIECE, KHÔNG DÙNG POINT!
+
+        Transform a = pieceA.transform;
+
         Vector3Int[] directions = {
-        new Vector3Int(1,0,0), new Vector3Int(-1,0,0),
-        new Vector3Int(0,0,1), new Vector3Int(0,0,-1),
-        new Vector3Int(1,0,1), new Vector3Int(-1,0,1),
-        new Vector3Int(1,0,-1), new Vector3Int(-1,0,-1)
+        new Vector3Int(1,0,0), new Vector3Int(-1,0,0),  // Ngang
+        new Vector3Int(0,0,1), new Vector3Int(0,0,-1),  // Dọc
+        new Vector3Int(1,0,1), new Vector3Int(-1,0,1),  // Chéo phải
+        new Vector3Int(1,0,-1), new Vector3Int(-1,0,-1) // Chéo trái
     };
+
         string[] names = { "PHẢI", "TRÁI", "XUỐNG", "LÊN", "CHÉO↘", "CHÉO↙", "CHÉO↗", "CHÉO↖" };
+
         for (int i = 0; i < directions.Length; i++)
         {
             Vector3Int neighbor = center + directions[i];
             if (!IsValidPosition(neighbor))
             {
-                Debug.Log($"<color=gray>Skip {names[i]}: Invalid pos {neighbor}</color>");
                 continue;
             }
 
-            // Nếu point OK, mới check pieceB
             GameObject pieceB = GetPieceAt(neighbor);
-            if (pieceB == null)
-            {
-                Debug.Log($"<color=gray>Skip {names[i]}: No pieceB at {neighbor}</color>");
-                continue;
-            }
+            if (pieceB == null) continue;
+
             string key = GetLineKey(center, neighbor);
-            string key1 = GetLineKey(neighbor,center);
-            if (lineRenderers.ContainsKey(key) || lineRenderers.ContainsKey(key1))
+            if (lineRenderers.ContainsKey(key)) continue;
+
+            if (!ArePointsAdjacent(center, neighbor)) continue;
+
+            // 🆕 SỬA: Nếu hướng chéo (i >= 4), vẽ qua center thay vì trực tiếp
+            if (i >= 4)  // Chéo (4-7)
             {
-                Debug.Log($"<color=yellow>Skip {names[i]}: Line {key} already exists (không tạo lại)</color>");
-                continue;
+                Vector2Int centerKey = GetCenterKeyForDiagonal(center, neighbor);  // Hàm mới dưới
+                if (centerPoints.TryGetValue(centerKey, out Transform centerTrans))
+                {
+                    // Vẽ 2 line: center → a, center → b (thay 1 line chéo)
+                    string key1 = $"{center.x}_{center.z}-C{GetCornerLabel(center, neighbor, true)}";
+                    CreateLineBetween(a, centerTrans, key1);
+
+                    string key2 = $"{neighbor.x}_{neighbor.z}-C{GetCornerLabel(center, neighbor, false)}";
+                    CreateLineBetween(pieceB.transform, centerTrans, key2);
+
+                    Debug.Log($"<color=lime>CHÉO QUA CENTER: {key1} & {key2} | {center} ↔ Center ↔ {neighbor}</color>");
+                    continue;  // Skip line trực tiếp
+                }
             }
-            // 🆕 SỬA: Kiểm tra điểm point của center và neighbor có ở cạnh nhau không
-            if (!ArePointsAdjacent(center, neighbor))  // 🆕 SỬA: Inverted condition - skip nếu KHÔNG adjacent (gap!)
-            {
-                Debug.Log($"<color=red>Skip {names[i]}: Point {center} và {neighbor} KHÔNG ở cạnh nhau (gap!)</color>");
-                continue;  // 🆕 SỬA: Continue nếu không adjacent
-            }
-            // Nếu adjacent và chưa tồn tại key, tạo line mới
-            CreateLineBetween(pieceA.transform, pieceB.transform, key); // ← DÙNG PIECE
-            Debug.Log($"<color=lime>LINE MỚI: {key} | {center} → {neighbor} | {names[i]} (adjacent OK)</color>");
+
+            // Line thường (ngang/dọc)
+            CreateLineBetween(a, pieceB.transform, key);
+            Debug.Log($"<color=lime>LINE THƯỜNG: {key} | {center} → {neighbor}</color>");
         }
+    }
+
+    // 🆕 HÀM HỖ TRỢ: Lấy key center cho chéo
+    private Vector2Int GetCenterKeyForDiagonal(Vector3Int pos1, Vector3Int pos2)
+    {
+        int minX = Mathf.Min(pos1.x, pos2.x);
+        int minZ = Mathf.Min(pos1.z, pos2.z);
+        return new Vector2Int(minX, minZ);  // Center của ô bao quanh
+    }
+
+    // 🆕 HÀM HỖ TRỢ: Label góc (TL/TR/BL/BR)
+    private string GetCornerLabel(Vector3Int pos1, Vector3Int pos2, bool isFirst)
+    {
+        Vector3Int corner = isFirst ? pos1 : pos2;
+        if (corner.x == pos1.x && corner.z == pos1.z) return "TL";
+        if (corner.x == pos2.x && corner.z == pos1.z) return "TR";
+        if (corner.x == pos1.x && corner.z == pos2.z) return "BL";
+        return "BR";
     }
 
     // 🆕 HÀM MỚI: Kiểm tra 2 vị trí Point có ở cạnh nhau không, nếu có thì nối line
@@ -355,8 +491,9 @@ public class BoardGrid3D : MonoBehaviour
     public void CreateGridLines()
     {
         lineRenderers.Clear();
+        Debug.Log("<color=blue>=== TẠO GRID LINES (NGANG/DỌC + 4 LINE CHÉO TỪ CENTER) ===</color>");
 
-        // Duyệt tất cả các ô (x, z)
+        // Duyệt tất cả các ô (x, z) – giữ nguyên ngang/dọc
         for (int x = 0; x < sizeX; x++)
         {
             for (int z = 0; z < sizeZ; z++)
@@ -364,49 +501,84 @@ public class BoardGrid3D : MonoBehaviour
                 Vector3Int current = new Vector3Int(x, 0, z);
                 Transform a = intersections[current];
 
-                // === 1. NỐI PHẢI (ngang) ===
+                // === 1. NỐI PHẢI (NGANG) – Giữ nguyên ===
                 if (x < sizeX - 1)
                 {
                     Vector3Int right = new Vector3Int(x + 1, 0, z);
                     Transform b = intersections[right];
                     string key = GetLineKey(current, right);
                     CreateLineBetween(a, b, key);
-                    Debug.Log("ngang");
+                    Debug.Log($"<color=green>NGANG: {key}</color>");
                 }
 
-                // === 2. NỐI XUỐNG (dọc) ===
+                // === 2. NỐI XUỐNG (DỌC) – Giữ nguyên ===
                 if (z < sizeZ - 1)
                 {
                     Vector3Int down = new Vector3Int(x, 0, z + 1);
                     Transform b = intersections[down];
                     string key = GetLineKey(current, down);
                     CreateLineBetween(a, b, key);
-                    Debug.Log("doc");
-                }
-
-                // === 3. NỐI CHÉO XUỐNG-PHẢI ( \ ) ===
-                if (x < sizeX - 1 && z < sizeZ - 1)
-                {
-                    Vector3Int diagDownRight = new Vector3Int(x + 1, 0, z + 1);
-                    Transform b = intersections[diagDownRight];
-                    string key = GetLineKey(current, diagDownRight);
-                    CreateLineBetween(a, b, key);
-                    Debug.Log("xuong phai");
-                }
-
-                // === 4. NỐI CHÉO XUỐNG-TRÁI ( / ) ===
-                if (x > 0 && z < sizeZ - 1)
-                {
-                    Vector3Int diagDownLeft = new Vector3Int(x - 1, 0, z + 1);
-                    Transform b = intersections[diagDownLeft];
-                    string key = GetLineKey(current, diagDownLeft);
-                    CreateLineBetween(a, b, key);
-                    Debug.Log("xuong trai");
+                    Debug.Log($"<color=green>DỌC: {key}</color>");
                 }
             }
         }
 
-        Debug.Log($"<color=magenta>ĐÃ TẠO {lineRenderers.Count} ĐƯỜNG LINE (NGANG, DỌC, CHÉO)!</color>");
+        // 🆕 SỬA: THÊM 4 LINE CHÉO TỪ CENTER ĐẾN 4 GÓC (thay vì 2 line chéo trực tiếp)
+        if (generateCenterPoints)
+        {
+            for (int x = 0; x < sizeX - 1; x++)  // Duyệt từng ô 1x1
+            {
+                for (int z = 0; z < sizeZ - 1; z++)
+                {
+                    // Lấy center transform (nếu không có, tạo tạm hoặc skip)
+                    if (!centerPoints.TryGetValue(new Vector2Int(x, z), out Transform centerTrans))
+                    {
+                        Debug.LogWarning($"<color=yellow>No center at {x}_{z}, skip chéo</color>");
+                        continue;
+                    }
+
+                    // 4 GÓC CỦA Ô NÀY
+                    Vector3Int[] corners = {
+                    new Vector3Int(x, 0, z),      // Góc trên-trái
+                    new Vector3Int(x + 1, 0, z),  // Góc trên-phải
+                    new Vector3Int(x, 0, z + 1),  // Góc dưới-trái
+                    new Vector3Int(x + 1, 0, z + 1)  // Góc dưới-phải
+                };
+
+                    string[] cornerNames = { "TL", "TR", "BL", "BR" };  // Top-Left, Top-Right, Bottom-Left, Bottom-Right
+
+                    for (int i = 0; i < corners.Length; i++)
+                    {
+                        Vector3Int corner = corners[i];
+                        if (!intersections.TryGetValue(corner, out Transform cornerTrans))
+                        {
+                            Debug.LogWarning($"<color=yellow>No corner at {corner}, skip</color>");
+                            continue;
+                        }
+
+                        // Tính key cho line từ center đến corner
+                        string key = GetLineKey(corner, new Vector3Int(x, 0, z));  // Dùng grid approx cho center (x,z)
+                        key += $"_C{cornerNames[i]}";  // Phân biệt (ví dụ: 0_0-0_0_C TL)
+
+                        if (lineRenderers.ContainsKey(key))
+                        {
+                            Debug.Log($"<color=orange>Line chéo {key} đã tồn tại</color>");
+                            continue;
+                        }
+
+                        // Tạo line từ corner đến center
+                        CreateLineBetween(cornerTrans, centerTrans, key);
+                        Debug.Log($"<color=lime>CHÉO 4 LINE: {key} | Corner {cornerNames[i]} ({corner}) → Center ({x + 0.5f}, {z + 0.5f})</color>");
+                    }
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("<color=yellow>generateCenterPoints = false → Không tạo 4 line chéo từ center</color>");
+        }
+
+        Debug.Log($"<color=magenta>ĐÃ TẠO {lineRenderers.Count} LINES (NGANG/DỌC + 4 CHÉO/CENTER)!</color>");
     }
     private string GetLineKey(Vector3Int a, Vector3Int b)
     {
@@ -433,25 +605,38 @@ public class BoardGrid3D : MonoBehaviour
     // === HÀM HỖ TRỢ: TẠO LINE RENDERER ===
     void CreateLineBetween(Transform a, Transform b, string key)
     {
+        // 🆕 THÊM: Check trùng pos với line cũ (tránh chồng line chéo)
+        Vector3 posA = a.position;
+        Vector3 posB = b.position;
+        bool isDuplicate = false;
+        foreach (var kvp in lineRenderers)
+        {
+            Vector3 existingP0 = kvp.Value.GetPosition(0);
+            Vector3 existingP1 = kvp.Value.GetPosition(1);
+            if ((Vector3.Distance(posA, existingP0) < 0.01f && Vector3.Distance(posB, existingP1) < 0.01f) ||
+                (Vector3.Distance(posA, existingP1) < 0.01f && Vector3.Distance(posB, existingP0) < 0.01f))
+            {
+                isDuplicate = true;
+                Debug.Log($"<color=yellow>Skip CreateLineBetween: Pos trùng line cũ {kvp.Key}</color>");
+                break;
+            }
+        }
+        if (isDuplicate || lineRenderers.ContainsKey(key)) return;  // Skip nếu trùng
+
         GameObject lineObj = new GameObject($"Line_{key}");
         lineObj.transform.parent = transform;
         LineRenderer lr = lineObj.AddComponent<LineRenderer>();
         lr.material = lineMat ?? new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-        lr.material.color =Color.black;
+        lr.material.color = Color.black;
         lr.startWidth = lr.endWidth = 0.02f;
         lr.useWorldSpace = true;
-
-        // DÙNG VỊ TRÍ CỦA PIECE
-        Vector3 posA = a.position;
-        Vector3 posB = b.position;
-
         lr.SetPosition(0, posA);
         lr.SetPosition(1, posB);
-
         lineRenderers[key] = lr;
+        Debug.Log($"<color=lime>Tạo line mới: {key} ({posA:F1} ↔ {posB:F1})</color>");
     }
 
-   
+
 
     public CubeTapHandler GetCubeAt(Vector3Int pos)
     {
@@ -543,7 +728,7 @@ public class BoardGrid3D : MonoBehaviour
         if (instance != null)
         {
             instance.name = $"{prefab.name}_at_{gridPos}";
-          
+
             CubeTapHandler handler = instance.GetComponent<CubeTapHandler>();
             if (handler == null)
             {
@@ -685,4 +870,6 @@ public class BoardGrid3D : MonoBehaviour
             Debug.LogWarning($"<color=yellow>No line with key {key}</color>");
         }
     }
+    // 🆕 HÀM LOG: Ghi giá trị lineRenderers (key, pos, color, width, name)
+   
 }
