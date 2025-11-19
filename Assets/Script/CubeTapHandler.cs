@@ -11,7 +11,7 @@ public class CubeTapHandler : MonoBehaviour
     // Biến static lưu cube đầu tiên được chọn
     private static CubeTapHandler firstSelectedCube = null;
     private static CubeTapHandler secondSelectedCube = null;
-
+    public bool isConnected = false;
     private Color[] mainColors;
     Color cubeColor;
     // Hàm này sẽ được gọi từ BoardGrid3D
@@ -19,6 +19,7 @@ public class CubeTapHandler : MonoBehaviour
     {
         board = boardRef;
         gridPos = pos;
+        isConnected = false;
     }
     void Start()
     {
@@ -27,6 +28,7 @@ public class CubeTapHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
     }
     private void OnMouseDown()
     {
@@ -58,50 +60,78 @@ public class CubeTapHandler : MonoBehaviour
         if (firstSelectedCube == null)
         {
             // Chỉ lưu nếu cube có màu hợp lệ (trong mainColors)
-            if (IsMainColor(currentColor) && gameObject.CompareTag("Specical"))
+            if (board.CheckAllPrefabColors(currentColor) && gameObject.CompareTag("Specical"))
             {
                 firstSelectedCube = this;
                 cubeColor = firstSelectedCube.GetComponent<Renderer>().material.color;
-                Debug.Log($"[SELECT] Đã chọn cube đầu tiên tại {gridPos} (màu: {currentColor})");
+                Debug.Log($"[SELECT] Đã chọn cube đầu tiên tại {gridPos} (màu: {currentColor} 1)");
+                this.isConnected = true;
                 selectedColor = currentColor;
+                board.CheckWinCondition();
             }
             else
             {
                 Debug.Log("Vui lòng chọn cube có màu  khác ");
             }
-
         }
         else
         {
-            bool hasLine = board.HasDirectLineConnection(firstSelectedCube.gridPos, gridPos);
+            bool hasLine = board.HasDirectLineConnectionToSelected(firstSelectedCube.gridPos,gridPos);
             // Chỉ lưu nếu cube có màu hợp lệ (trong mainColors)
-            if (IsMainColor(currentColor) && gameObject.CompareTag("Specical") && !hasLine)
-            {
-                firstSelectedCube = this;
+            if (board.CheckAllPrefabColors(currentColor) && gameObject.CompareTag("Specical") && !hasLine)
+            {   
                 //lấy màu hiện tại của cube khi tap
                 cubeColor = firstSelectedCube.GetComponent<Renderer>().material.color;
-                Debug.Log($"[SELECT] Đã chọn lại cube đầu tiên tại {gridPos} (màu: {currentColor})");
+
+                Debug.Log($"[SELECT] Đã chọn lại cube đầu tiên tại {gridPos} (màu: {currentColor} , màu: {firstSelectedCube.mainColors} , name : {firstSelectedCube.name}2)");
                 selectedColor = currentColor;
+                cubeColor = render.material.color;
+                string prefabname1 = GetBasePrefabName(this.name);
+                firstSelectedCube = this;
+                this.isConnected = true;
+                board.ResetAllLinesAppearance(prefabname1, cubeColor);
+                board.CheckWinCondition();
             }
             else
             {
-                if (!gameObject.CompareTag("Specical"))
+                string prefabname1 = GetBasePrefabName(this.name);
+                string prefabname2 = GetBasePrefabName(firstSelectedCube.name);
+                if (prefabname1.Contains(prefabname2)||prefabname2.Contains(prefabname1))
                 {
-                    Debug.Log($"🔍 VỊ TRÍ GRID: {gridPos} , vị trí firstSelectedCube : {firstSelectedCube.gridPos} , color : {selectedColor}"); // ← IN RA (x,y,z)
-                    render.material.color = (Color)selectedColor;
-                    board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor);  // Highlight cube 1 màu
-                    firstSelectedCube = this;
-
+                    if (!gameObject.CompareTag("Specical") && !IsSameColor(currentColor, firstSelectedCube.cubeColor))
+                    {
+                        Debug.Log($"🔍 VỊ TRÍ GRID: {gridPos} , vị trí firstSelectedCube : {firstSelectedCube.gridPos} , color : {selectedColor}"); // ← IN RA (x,y,z)
+                        render.material.color = (Color)selectedColor;
+                        cubeColor = render.material.color;
+                        board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor);  // Highlight cube 1 màu
+                        firstSelectedCube = this;
+                        this.isConnected = true;
+                        board.CheckWinCondition();
+                        Debug.Log($"[SELECT] Đã tap và nối line thành công 3)");
+                    }
+                    else
+                    {
+                        if (!IsSameColor(currentColor, firstSelectedCube.cubeColor))
+                        {
+                            Debug.Log($"[SELECT] ko thể nối do cùng là specical prefab )");
+                        }
+                        else
+                        {
+                            board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor);  // Highlight cube 1 màu
+                            firstSelectedCube = this;
+                            this.isConnected = true;
+                            board.CheckWinCondition();
+                        }
+                    }
                 }
                 else
                 {
-                    board.HightLightLineBetween(gridPos, firstSelectedCube.gridPos, (Color)selectedColor);
-                    firstSelectedCube = null;
+                    Debug.Log("ko thể nối giữa 2 hình khác nhau");
                 }
             }
         }
-
     }
+
     private bool IsSameColor(Color cubeColor, Color currentColor)
     {
         if (Mathf.Approximately(cubeColor.r, currentColor.r) &&
@@ -122,25 +152,18 @@ public class CubeTapHandler : MonoBehaviour
         }
         return false;
     }
-    //kiểm tra đường nối trực tiếp
-    public bool HasDirectLine(CubeTapHandler other)
+    // lấy tên game object
+    public string GetBasePrefabName(string fullName)
     {
-        // cùng hàng hoặc cùng cột
-        if (gridPos.x != other.gridPos.x && gridPos.z != other.gridPos.z)
-            return false;
-        //xác định hướng
-        Vector3Int direction = new Vector3Int(
-            Mathf.Clamp(other.gridPos.x - gridPos.x, -1, 1),
-            0,
-            Mathf.Clamp(other.gridPos.z - gridPos.z, -1, 1)
-            );
-        Vector3Int checkPos = gridPos + direction;
-        while (checkPos != other.gridPos)
+        if (string.IsNullOrEmpty(fullName)) return "";
+
+        int atIndex = fullName.IndexOf("_at_(");
+        if (atIndex > 0)
         {
-            var cubeBetween = board.GetCubeAt(checkPos);
-            if (cubeBetween != null) return false;
-            checkPos += direction;
+            return fullName.Substring(0, atIndex);  // Lấy phần trước "_at_"
         }
-        return false;
+
+        Debug.LogWarning($"<color=yellow>Tên '{fullName}' không chứa '_at_' – trả về full name!</color>");
+        return fullName;  // Fallback nếu không có "_at_"
     }
 }

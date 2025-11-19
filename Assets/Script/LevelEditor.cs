@@ -528,14 +528,7 @@ public class LevelEditor : EditorWindow
     }
     private void RemoveSpecialDot(Vector3Int pos) => specialDots.RemoveAll(d => d.gridPos == pos);
     private void ValidateSpecialDots() => specialDots.RemoveAll(d => !IsValidPos(d.gridPos));
-    private void ClearAll()
-    {
-        if (EditorUtility.DisplayDialog("Clear", "Xóa tất cả?", "Yes", "No"))
-        {
-            specialDots.Clear();
-            DeleteBoard();
-        }
-    }
+
     private void SaveLevel()
     {
         // Validate trước khi save (xóa invalid dots)
