@@ -1,9 +1,12 @@
-﻿using System;
+﻿//using System;
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEditor;
+using UnityEditor.SceneManagement;  // Nếu dùng SceneView
 public class LevelEditor : EditorWindow
 {
     // === CẤU HÌNH BOARD ===
@@ -116,7 +119,7 @@ public class LevelEditor : EditorWindow
                                 // XÓA PREFAB CŨ TẠI VỊ TRÍ NÀY (nếu có)
                                 ClearPrefabAtPosition(dot.gridPos);
                                 // SPAWN MỚI
-                                createdBoard.SpawnPrefabAt(dot.gridPos, prefab);
+                               SpawnPrefabAt(dot.gridPos, prefab);
                                 // 🆕 THÊM: Log vị trí Point khi kéo/spawn
                                 dot.gridPos = new Vector3Int(x, y, z);
                                 LogPointPositionAtSpawn(dot.gridPos, go.name);
@@ -342,7 +345,7 @@ public class LevelEditor : EditorWindow
                     createdBoard.SpawnPrefabAt(dot.gridPos, prefab);
             }
         }
-        createdBoard.ApplySpecialDots(specialDots);
+       ApplySpecialDots(specialDots);
         UpdateAllPrefabColors();
     }
     private void UpdateAllPrefabColors()
@@ -546,7 +549,7 @@ public class LevelEditor : EditorWindow
         if (createdBoard != null)
         {
             // Gọi hàm GetAllLines từ BoardGrid3D để lấy list lines (bạn cần thêm hàm này)
-            data.lines = createdBoard.GetAllLines();  // Return List<LineData> từ lineRenderers
+            data.lines = GetAllLines();  // Return List<LineData> từ lineRenderers
         }
         string json = JsonUtility.ToJson(data, true);
         string path = EditorUtility.SaveFilePanel("Save Level", "Assets/Levels", levelName + ".json", "json");
@@ -682,4 +685,122 @@ public class LevelEditor : EditorWindow
             Debug.LogError($"<color=red>Khi kéo '{prefabName}', KHÔNG tìm thấy Point tại {gridPos}! (Chạy GenerateBoard trước?)</color>");
         }
     }
+
+    public List<LevelEditor.LineData> GetAllLines()
+    {
+        List<LevelEditor.LineData> lines = new List<LevelEditor.LineData>();
+        foreach (var kvp in createdBoard.lineRenderers)
+        {
+            Vector3 start = kvp.Value.GetPosition(0);
+            Vector3 end = kvp.Value.GetPosition(1);
+            lines.Add(new LevelEditor.LineData { startKey = start.ToString("F1"), endKey = end.ToString("F1"), lineColor = kvp.Value.material.color });
+        }
+        return lines;
+    }
+
+    public void ApplySpecialDots(List<LevelEditor.SpecialDot> specialDots = null)
+    {
+        if (specialDots == null || specialDots.Count == 0) return;
+
+        foreach (var dot in specialDots)
+        {
+            if (createdBoard.IsValidPosition(dot.gridPos))
+            {
+                // 1. Tag cube ẩn (giữ nguyên)
+                int idx = dot.gridPos.z * sizeX + dot.gridPos.x;
+                if (idx < createdBoard.sphereList.Count)
+                {
+                    createdBoard.sphereList[idx].gameObject.tag = "Special";  // Sửa typo: "Specical" → "Special"
+                }
+
+                // 🆕 THÊM: Tô màu prefab instance nếu có
+                GameObject prefabInstance = createdBoard. GetPieceAt(dot.gridPos);
+                if (prefabInstance != null && dot.prefabColor != Color.white)  // Color.white = mặc định
+                {
+                    Renderer[] renderers = prefabInstance.GetComponentsInChildren<Renderer>();
+                    foreach (var rend in renderers)
+                    {
+                        if (rend.material != null)
+                        {
+                            rend.material.color = dot.prefabColor;
+                        }
+                    }
+                    Debug.Log($"<color=green>Applied color {dot.prefabColor} to prefab at {dot.gridPos}</color>");
+                }
+            }
+        }
+    }
+
+    public GameObject SpawnPrefabAt(Vector3Int gridPos, GameObject prefab)
+    {
+        if (prefab == null || !createdBoard.IsValidPosition(gridPos))
+        {
+            Debug.LogError($"<color=red>Spawn thất bại: Prefab null hoặc vị trí {gridPos} không hợp lệ!</color>");
+            return null;
+        }
+        // Sử dụng intersections để lấy vị trí chính xác (fix bug index)
+        if (!createdBoard.intersections.TryGetValue(gridPos, out Transform pointTransform))
+        {
+            Debug.LogError($"<color=red>Spawn thất bại: Không tìm thấy Point tại {gridPos}!</color>");
+            return null;
+        }
+        Vector3 worldPos = pointTransform.position; // Hoặc + Vector3.up * 0.4f nếu cần offset
+        GameObject instance = null;
+        if (Application.isPlaying)
+        {
+            instance = Instantiate(prefab, worldPos, Quaternion.identity, transform);
+        }
+        else
+        {
+            instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, transform);
+            if (instance != null)
+            {
+                instance.transform.position = worldPos;
+            }
+        }
+        if (instance != null)
+        {
+            // ← THÊM ĐOẠN NÀY: CĂN GIỮA VÀ SCALE GIỐNG CUBE
+
+
+            instance.name = $"{prefab.name}_at_{gridPos}";
+
+            CubeTapHandler handler = instance.GetComponent<CubeTapHandler>();
+            if (handler == null)
+            {
+                handler = instance.AddComponent<CubeTapHandler>();  // Add nếu chưa có trên prefab
+            }
+            handler.Init(this, gridPos);  // Gọi Init để set board + gridPos (bỏ qua Start())
+            handler.enabled = true;  // Enable nếu disabled
+            handler.isConnected = false;
+
+            // 🆕 THÊM: Log kiểm tra spawn thành công + handler
+            Debug.Log($"<color=green>✅ Spawn thành công: '{prefab.name}' tại {gridPos} (Point: {pointTransform.name}, World Pos: {worldPos:F2}) + Handler inited</color>");
+            // Xóa line cũ và vẽ mới (giữ nguyên logic)
+            createdBoard.RemoveLinesAtPosition(gridPos);
+            createdBoard.DrawLinesFromCube(gridPos);
+            Vector3Int[] dirs = {
+            new Vector3Int(1,0,0), new Vector3Int(-1,0,0),
+            new Vector3Int(0,0,1), new Vector3Int(0,0,-1),
+            new Vector3Int(1,0,1), new Vector3Int(-1,0,1),
+            new Vector3Int(1,0,-1), new Vector3Int(-1,0,-1)
+        };
+            foreach (var dir in dirs)
+            {
+                Vector3Int neighbor = gridPos + dir;
+                if (createdBoard.IsValidPosition(neighbor) && createdBoard.IsAdjacent(gridPos, neighbor) && createdBoard.HasPrefabAt(neighbor))
+                {
+                    createdBoard.DrawLinesFromCube(neighbor);
+                }
+            }
+            return instance;
+        }
+        else
+        {
+            // 🆕 THÊM: Log kiểm tra spawn thất bại
+            Debug.LogError($"<color=red>❌ Spawn thất bại: Không tạo được instance cho '{prefab.name}' tại {gridPos}!</color>");
+            return null;
+        }
+    }
 }
+#endif

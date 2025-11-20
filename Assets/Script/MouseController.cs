@@ -1,9 +1,11 @@
-using System;
-using System.Collections.Generic;
-using UnityEditor.PackageManager.UI;
+//using System;
+//using System.Collections.Generic;
+//using UnityEditor.PackageManager.UI;
 using UnityEngine;
-using UnityEngine.UIElements;
-
+//using UnityEngine.UIElements;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 public class MouseController : MonoBehaviour
 {
     BoardGrid3D board;

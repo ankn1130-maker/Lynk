@@ -78,7 +78,7 @@ public class CubeTapHandler : MonoBehaviour
         {
             bool hasLine = board.HasDirectLineConnectionToSelected(firstSelectedCube.gridPos,gridPos);
             // Chỉ lưu nếu cube có màu hợp lệ (trong mainColors)
-            if (board.CheckAllPrefabColors(currentColor) && gameObject.CompareTag("Specical") && !hasLine)
+            if ((board.CheckAllPrefabColors(currentColor) && gameObject.CompareTag("Specical") && !hasLine) || (!IsSameColor(currentColor,firstSelectedCube.cubeColor) && gameObject.CompareTag("Specical")))
             {   
                 //lấy màu hiện tại của cube khi tap
                 cubeColor = firstSelectedCube.GetComponent<Renderer>().material.color;
@@ -96,38 +96,85 @@ public class CubeTapHandler : MonoBehaviour
             {
                 string prefabname1 = GetBasePrefabName(this.name);
                 string prefabname2 = GetBasePrefabName(firstSelectedCube.name);
-                if (prefabname1.Contains(prefabname2)||prefabname2.Contains(prefabname1))
+                if (gameObject.CompareTag("Bridge"))
                 {
-                    if (!gameObject.CompareTag("Specical") && !IsSameColor(currentColor, firstSelectedCube.cubeColor))
+                    foreach (Transform child in transform)
                     {
-                        Debug.Log($"🔍 VỊ TRÍ GRID: {gridPos} , vị trí firstSelectedCube : {firstSelectedCube.gridPos} , color : {selectedColor}"); // ← IN RA (x,y,z)
-                        render.material.color = (Color)selectedColor;
-                        cubeColor = render.material.color;
-                        board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor);  // Highlight cube 1 màu
-                        firstSelectedCube = this;
-                        this.isConnected = true;
-                        board.CheckWinCondition();
-                        Debug.Log($"[SELECT] Đã tap và nối line thành công 3)");
-                    }
-                    else
-                    {
-                        if (!IsSameColor(currentColor, firstSelectedCube.cubeColor))
+                        string childName = child.name;
+                        if (prefabname2.Contains(childName))
                         {
-                            Debug.Log($"[SELECT] ko thể nối do cùng là specical prefab )");
-                        }
-                        else
-                        {
-                            board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor);  // Highlight cube 1 màu
-                            firstSelectedCube = this;
-                            this.isConnected = true;
-                            board.CheckWinCondition();
+                            
+                            Debug.Log($"<color=green>Khớp tên child '{childName}' trong Bridge '{gameObject.name}' với prefabname2 = {prefabname2}</color>");
+
+                            // Ví dụ xử lý child khớp (đổi màu hoặc logic khác)
+                            Renderer childRenderer = child.GetComponentInChildren<Renderer>();  // GetInChildren để tìm Renderer con nếu có
+                            if (childRenderer != null && childRenderer.material != null)
+                            {
+                                // ← FIX: CLONE MATERIAL ĐỂ INSTANCE RIÊNG (KHÔNG SHARED)
+                                Material newMaterial = new Material(childRenderer.material);  // Clone
+                                childRenderer.material = newMaterial;  // Assign instance mới
+
+                                // Đổi màu
+                                newMaterial.color = firstSelectedCube.cubeColor;
+                                childRenderer.enabled = true;  // Bật nếu ẩn
+                                if (board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor))
+                                {
+                                    this.isConnected = true;
+                                    firstSelectedCube = this;
+                                    board.CheckWinCondition();
+                                    firstSelectedCube.cubeColor = (Color)selectedColor;
+                                    firstSelectedCube.name = prefabname2;
+                                }
+
+                                    Debug.Log($"<color=lime>ĐÃ ĐỔI MÀU CHILD KHỚP '{childName}' thành {firstSelectedCube.cubeColor} (old color: {childRenderer.material.color})</color>");
+                            }
                         }
                     }
                 }
                 else
                 {
-                    Debug.Log("ko thể nối giữa 2 hình khác nhau");
+                    if (prefabname1.Contains(prefabname2) || prefabname2.Contains(prefabname1))
+                    {
+                        if (!gameObject.CompareTag("Specical") && !IsSameColor(currentColor, firstSelectedCube.cubeColor))
+                        {
+                            Debug.Log($"🔍 VỊ TRÍ GRID: {gridPos} , vị trí firstSelectedCube : {firstSelectedCube.gridPos} , color : {selectedColor}"); // ← IN RA (x,y,z)
+
+                            if (board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor))
+                            {
+                                render.material.color = (Color)selectedColor;
+                                cubeColor = render.material.color;
+                                firstSelectedCube = this;
+                                this.isConnected = true;
+                                board.CheckWinCondition();
+                                Debug.Log($"[SELECT] Đã tap và nối line thành công 3)");
+                            }
+                           
+                        }
+                        else
+                        {
+                            if (!IsSameColor(currentColor, firstSelectedCube.cubeColor))
+                            {
+                                Debug.Log($"[SELECT] ko thể nối do cùng là specical prefab )");
+                            }
+                            else
+                            {
+                                // Highlight cube 1 màu
+                                if (board.HightLightLineBetween(firstSelectedCube.gridPos, gridPos, (Color)selectedColor))
+                                {
+                                    firstSelectedCube = this;
+                                    this.isConnected = true;
+                                    board.CheckWinCondition();
+                                }
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("ko thể nối giữa 2 hình khác nhau");
+                    }
                 }
+
             }
         }
     }
